@@ -64,14 +64,23 @@ public class LocationAccess implements SensorEventListener{
     private Sensor mSensorMagnetic;
     private double mBearingMagnetic = 0.0;
 
-
+/**
+     * interface to perform action on location update
+     */
+    public interface LocationUpdateListener{
+        void onLocationUpdate(Location location);
+    }
+    
     /**
      * public constructor. instantiate this object in the required activity
      * all location services are handled in this object and data can be called with the getter methods defined below
      * @param context of the instantiating activity
      */
-    public LocationAccess(Context context){
+    public LocationAccess(Context context, @Nullable LocationUpdateListener locationUpdateListener){
         mContext = context;
+        if (locationUpdateListener != null) {
+            this.mLocationUpdateListener = locationUpdateListener;
+        }
         /**
          * initiate the FusedLocationProviderClient that will provide the last known locations.
          */
@@ -93,6 +102,8 @@ public class LocationAccess implements SensorEventListener{
             public void onLocationResult(LocationResult locationResult) {
                 for (Location location : locationResult.getLocations()) {
                     long time = System.currentTimeMillis();
+                    //call interface if established
+                    if (mLocationUpdateListener != null){mLocationUpdateListener.onLocationUpdate(location);}
                     mLocation = location;
                     mLatitude = location.getLatitude();
                     mLongitude = location.getLongitude();
